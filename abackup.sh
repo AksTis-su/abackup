@@ -13,7 +13,7 @@
 
 # Настраиваемые переменные
 BACKUP_NAME="your_backup_name"  # Название (nginx, letsencrypt и т.д.)
-SOURCE_DIRS="your_source_dir1 your_source_dir2"  # Список директорий для бэкапа (через пробел)
+SOURCE_PATHS="your_source_dir your/file.txt"  # Список директорий и файлов для бэкапа (через пробел)
 
 # Единожды настраиваемые переменные
 BACKUP_DIR="/home/$USER/backup/$BACKUP_NAME"  # Базовая директория для хранения бэкапов
@@ -36,16 +36,22 @@ error() { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
 
 info "Проверка и создание каталога бэкапа: $BACKUP_DIR"
 if [ ! -d "$BACKUP_DIR" ]; then
-    mkdir -p "$BACKUP_DIR" || error "Ошибка создания $BACKUP_DIR"
+	mkdir -p "$BACKUP_DIR" || error "Ошибка создания $BACKUP_DIR"
 fi
 
 info "Создание временного каталога: $TEMP_DIR"
 mkdir -p "$TEMP_DIR" || error "Ошибка создания $TEMP_DIR"
 
-info "Копирование директорий: $SOURCE_DIRS"
-for dir in $SOURCE_DIRS; do
-    [ -d "$dir" ] || error "Директория $dir не существует"
-    sudo cp -r "$dir" "$TEMP_DIR/$(echo "$dir" | sed 's|^/||;s|/|-|g')" || error "Ошибка копирования $dir"
+info "Копирование: $SOURCE_PATHS"
+for path in $SOURCE_PATHS; do
+	[ -e "$path" ] || error "Файл или директория $path не существует"
+	dest_name=$(echo "$path" | sed 's|^/||;s|/|-|g')
+	if [ -d "$path" ]; then
+		sudo cp -r "$path" "$TEMP_DIR/$dest_name" || error "Ошибка копирования $path"
+	else
+		dest_dir="$TEMP_DIR/$(dirname "$path" | sed 's|^/||;s|/|-|g')"
+		mkdir -p "$dest_dir" && sudo cp "$path" "$dest_dir/$(basename "$path")" || error "Ошибка копирования $path"
+	fi
 done
 
 info "Изменение владельца временных файлов на текущего пользователя"
