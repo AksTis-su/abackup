@@ -22,9 +22,9 @@ TEMP_DIR="$BACKUP_DIR/temp"  # Временная папка
 # ZIP_PASSWORD="your_secure_password"
 
 # Создай файл с паролем
-# echo "your_secure_password" > /home/$USER/.zip_password
-# chmod 600 /home/$USER/.zip_password
-ZIP_PASSWORD=$(cat /home/$USER/.zip_password)  # Пароль для ZIP-архива
+# echo "your_secure_password" > /home/$USER/.abackup_zip_pass
+# chmod 600 /home/$USER/.abackup_zip_pass
+ZIP_PASSWORD=$(cat /home/$USER/.abackup_zip_pass)  # Пароль для ZIP-архива
 
 DATE=$(date +%Y-%m-%d_%H.%M.%S)
 GREEN='\033[0;32m'
